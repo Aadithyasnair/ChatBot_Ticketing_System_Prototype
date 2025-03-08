@@ -52,6 +52,13 @@
         .chat-input button:hover {
             background-color: #0056b3;
         }
+        .additional-inputs {
+            display: none;
+            flex-direction: column;
+        }
+        .additional-inputs input {
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -63,11 +70,22 @@
             <input type="text" id="user-message" placeholder="Type your message...">
             <button onclick="sendMessage()">Send</button>
         </div>
+        <div class="additional-inputs" id="additional-inputs">
+            <input type="text" id="user-name" placeholder="Your Name">
+            <input type="number" id="num-tickets" placeholder="Number of Tickets">
+            <input type="email" id="user-email" placeholder="Your Email">
+        </div>
     </div>
 
     <script>
+        let bookingStep = 0;
+
         function sendMessage() {
             const userMessage = document.getElementById('user-message').value;
+            const userName = document.getElementById('user-name').value;
+            const numTickets = document.getElementById('num-tickets').value;
+            const userEmail = document.getElementById('user-email').value;
+
             if (userMessage) {
                 document.getElementById('user-message').value = '';
                 displayMessage(`You: ${userMessage}`);
@@ -76,11 +94,15 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ message: userMessage }),
+                    body: JSON.stringify({ message: userMessage, name: userName, tickets: numTickets, email: userEmail, step: bookingStep }),
                 })
                 .then(response => response.json())
                 .then(data => {
                     displayMessage(`Chatbot: ${data.response}`);
+                    if (data.showAdditionalInputs) {
+                        document.getElementById('additional-inputs').style.display = 'flex';
+                    }
+                    bookingStep = data.nextStep;
                 });
             }
         }
